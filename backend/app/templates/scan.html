@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scan Shipment</title>
+    <style>
+        :root {
+            --primary: #3b82f6; --bg: #f3f4f6; --text: #1f2937;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 1rem;
+        }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h2 { margin-top: 0; color: var(--primary); text-align: center; }
+        .info { background: #eff6ff; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
+        .info p { margin: 0.5rem 0; }
+        .info span { font-weight: bold; }
+        
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        input[type="text"] {
+            width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem;
+        }
+        
+        /* File upload styling */
+        .file-upload-wrapper {
+            position: relative; overflow: hidden; display: inline-block; width: 100%;
+        }
+        .file-upload-wrapper input[type="file"] {
+            font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%;
+        }
+        .btn-upload {
+            display: block; width: 100%; padding: 0.75rem; background: #f3f4f6; border: 2px dashed #9ca3af;
+            color: #4b5563; text-align: center; border-radius: 6px; font-weight: 600; cursor: pointer;
+        }
+        .img-preview {
+            max-width: 100%; max-height: 150px; margin-top: 0.5rem; border-radius: 6px; display: none; object-fit: cover;
+        }
+
+        .btn-submit {
+            display: block; width: 100%; padding: 1rem; background: var(--primary); color: white;
+            border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+            margin-top: 1.5rem;
+        }
+        .btn-submit:disabled { background: #9ca3af; cursor: not-allowed; }
+        
+        #location-status {
+            font-size: 0.85rem; padding: 0.5rem; margin-bottom: 1rem; border-radius: 6px; text-align: center;
+        }
+        .loc-wait { background: #fef3c7; color: #b45309; }
+        .loc-ok { background: #d1fae5; color: #047857; }
+        .loc-err { background: #fee2e2; color: #b91c1c; }
+        
+        .hidden { display: none; }
+        
+        /* Loader */
+        .loader {
+            border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%;
+            width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 0 auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container" id="main-content">
+        <h2>Scan Shipment</h2>
+        <div class="info">
+            <p>ID: <span>{{ shipment.tracking_id }}</span></p>
+            <p>From: <span>{{ shipment.from_location }}</span></p>
+            <p>To: <span>{{ shipment.to_location }}</span></p>
+            <p>Status: <span>{{ shipment.status }}</span></p>
+        </div>
+
+        <div id="location-status" class="loc-wait">
+            Requesting location...
+        </div>
+
+        <form id="scan-form">
+            <input type="hidden" id="lat" name="latitude">
+            <input type="hidden" id="lng" name="longitude">
+            <input type="hidden" id="acc" name="accuracy">
+
+            <div class="form-group">
+                <label>Executive Name</label>
+                <input type="text" name="executive_name" required placeholder="John Doe">
+            </div>
+
+            <div class="form-group">
+                <label>Package Photo (Rear Camera)</label>
+                <div class="file-upload-wrapper">
+                    <div class="btn-upload" id="pkg-btn-text">Tap to Take Photo</div>
+                    <input type="file" name="package_photo" id="pkg-input" accept="image/jpeg, image/png, image/webp" capture="environment" required>
+                </div>
+                <img id="pkg-preview" class="img-preview">
+            </div>
+
+            <div class="form-group">
+                <label>Selfie with Package (Front Camera)</label>
+                <div class="file-upload-wrapper">
+                    <div class="btn-upload" id="selfie-btn-text">Tap to Take Selfie</div>
+                    <input type="file" name="selfie_photo" id="selfie-input" accept="image/jpeg, image/png, image/webp" capture="user" required>
+                </div>
+                <img id="selfie-preview" class="img-preview">
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn-submit" disabled>Submit Scan</button>
+        </form>
+    </div>
+
+    <div class="container hidden" id="success-content" style="text-align: center; padding: 3rem 1rem;">
+        <h2 style="color: #10b981; font-size: 2rem;">Success!</h2>
+        <p>The shipment has been successfully scanned.</p>
+        <p style="font-weight: bold; margin-top: 1rem;">Tracking ID: {{ shipment.tracking_id }}</p>
+    </div>
+
+    <script>
+        const trackingId = "{{ shipment.tracking_id }}";
+        const locStatus = document.getElementById('location-status');
+        const submitBtn = document.getElementById('submit-btn');
+        const latInp = document.getElementById('lat');
+        const lngInp = document.getElementById('lng');
+        const accInp = document.getElementById('acc');
+        let locationObtained = false;
+
+        // Preview Image Function
+        function setupPreview(inputId, previewId, btnId) {
+            document.getElementById(inputId).addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.getElementById(previewId);
+                        img.src = e.target.result;
+                        img.style.display = 'block';
+                        document.getElementById(btnId).textContent = 'Change Photo';
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+        setupPreview('pkg-input', 'pkg-preview', 'pkg-btn-text');
+        setupPreview('selfie-input', 'selfie-preview', 'selfie-btn-text');
+
+        // Request Geolocation
+        function requestLocation() {
+            if (!navigator.geolocation) {
+                locStatus.className = 'loc-err';
+                locStatus.innerText = 'Geolocation is not supported by your browser';
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    latInp.value = position.coords.latitude;
+                    lngInp.value = position.coords.longitude;
+                    accInp.value = position.coords.accuracy;
+                    locationObtained = true;
+                    locStatus.className = 'loc-ok';
+                    locStatus.innerText = 'Location captured successfully';
+                    submitBtn.disabled = false;
+                },
+                (error) => {
+                    locStatus.className = 'loc-err';
+                    locStatus.innerHTML = `Location access denied. <a href="#" onclick="requestLocation(); return false;" style="color: inherit; text-decoration: underline;">Retry</a>`;
+                    submitBtn.disabled = true;
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+        
+        // Initial location request
+        requestLocation();
+
+        // Form Submission
+        document.getElementById('scan-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!locationObtained) {
+                alert("Please allow location access to submit.");
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loader"></div>';
+            
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch(`/api/events/${trackingId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    document.getElementById('main-content').classList.add('hidden');
+                    document.getElementById('success-content').classList.remove('hidden');
+                } else {
+                    const err = await response.json();
+                    alert("Error: " + (err.detail || "Submission failed"));
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Submit Scan';
+                }
+            } catch (error) {
+                alert("Network error occurred.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Submit Scan';
+            }
+        });
+    </script>
+</body>
+</html>
