@@ -19,7 +19,7 @@ def create_admin():
         
     admin = AdminUser(
         username="admin",
-        password_hash=get_password_hash("admin123")
+        password_hash=get_password_hash("admin@123")
     )
     db.add(admin)
     db.commit()
