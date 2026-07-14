@@ -33,7 +33,7 @@ export const ShipmentDetails = () => {
         <head><title>Print QR</title></head>
         <body style="display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; flex-direction:column;">
           <h2>${shipment.tracking_id}</h2>
-          <img src="http://localhost:8000${shipment.qr_code_url}" style="width: 300px;" />
+          <img src="https://logistic-prototype.onrender.com${shipment.qr_code_url}" style="width: 300px;" />
         </body>
       </html>
     `);
@@ -61,7 +61,7 @@ export const ShipmentDetails = () => {
             <Printer className="w-4 h-4" /> Print QR
           </button>
           <a 
-            href={`http://localhost:8000${shipment.qr_code_url}`}
+            href={`https://logistic-prototype.onrender.com${shipment.qr_code_url}`}
             download={`${shipment.tracking_id}_QR.png`}
             target="_blank"
             rel="noreferrer"
@@ -79,7 +79,7 @@ export const ShipmentDetails = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center justify-center text-center">
             <h3 className="font-semibold text-gray-800 mb-4">Tracking QR Code</h3>
             {shipment.qr_code_url ? (
-              <img src={`http://localhost:8000${shipment.qr_code_url}`} alt="QR Code" className="w-48 h-48 border rounded-xl" />
+              <img src={`https://logistic-prototype.onrender.com${shipment.qr_code_url}`} alt="QR Code" className="w-48 h-48 border rounded-xl" />
             ) : (
               <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">No QR</div>
             )}
@@ -155,11 +155,11 @@ export const ShipmentDetails = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-xs text-gray-500 font-medium mb-1 flex items-center gap-1"><Camera className="w-3 h-3"/> Package Photo</p>
-                          <img src={`http://localhost:8000${event.package_photo_url}`} alt="Package" className="w-full h-32 object-cover rounded-lg border border-gray-200" />
+                          <img src={`https://logistic-prototype.onrender.com${event.package_photo_url}`} alt="Package" className="w-full h-32 object-cover rounded-lg border border-gray-200" />
                         </div>
                         <div>
                           <p className="text-xs text-gray-500 font-medium mb-1 flex items-center gap-1"><Camera className="w-3 h-3"/> Executive Selfie</p>
-                          <img src={`http://localhost:8000${event.selfie_photo_url}`} alt="Selfie" className="w-full h-32 object-cover rounded-lg border border-gray-200" />
+                          <img src={`https://logistic-prototype.onrender.com${event.selfie_photo_url}`} alt="Selfie" className="w-full h-32 object-cover rounded-lg border border-gray-200" />
                         </div>
                       </div>
                     </div>
