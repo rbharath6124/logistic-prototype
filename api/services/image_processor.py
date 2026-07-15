@@ -3,7 +3,7 @@ import uuid
 from PIL import Image
 from io import BytesIO
 from fastapi import UploadFile
-from app.core.config import settings
+from api.core.config import settings
 
 def process_and_save_image(file: UploadFile, prefix: str = "img") -> str:
     """Reads an uploaded image, compresses it, saves it to uploads, and returns the URL."""

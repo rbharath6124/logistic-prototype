@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Float, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 import uuid
 import datetime
-from app.database import Base
+from api.database import Base
 
 def generate_uuid():
     return str(uuid.uuid4())

@@ -5,8 +5,8 @@ from typing import Optional
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Logistics QR Tracking"
     API_V1_STR: str = "/api"
-    # SQLite Database for dev
-    DATABASE_URL: str = "sqlite:///./logistics.db"
+    # SQLite Database for dev/vercel
+    DATABASE_URL: str = "sqlite:////tmp/logistics.db"
     
     # Auth (Stubbed for now, leaving space for Google OAuth)
     SECRET_KEY: str = "this-is-a-super-secret-key-for-dev-change-it"
@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: Optional[str] = None
     GOOGLE_CLIENT_SECRET: Optional[str] = None
     
-    # Uploads
-    UPLOAD_DIR: str = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+    # Uploads (Must be in /tmp on Vercel)
+    UPLOAD_DIR: str = "/tmp/uploads"
 
     model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True, extra="ignore")
 

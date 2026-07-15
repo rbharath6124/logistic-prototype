@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
-from app.database import get_db
-from app.models import Shipment, HandlingEvent
-from app.schemas import ShipmentCreate, ShipmentResponse, HandlingEventResponse
-from app.core.security import get_current_user
-from app.services.qr_generator import generate_qr_code
+from api.database import get_db
+from api.models import Shipment, HandlingEvent
+from api.schemas import ShipmentCreate, ShipmentResponse, HandlingEventResponse
+from api.core.security import get_current_user
+from api.services.qr_generator import generate_qr_code
 
 router = APIRouter()
 

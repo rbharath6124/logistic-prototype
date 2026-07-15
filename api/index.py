@@ -2,13 +2,33 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
-from app.api import auth, shipments, events, stats
-from app.core.config import settings
-from app.database import engine, Base
-from app.models import Shipment
+from api.api import auth, shipments, events, stats
+from api.core.config import settings
+from api.database import engine, Base
+from api.models import Shipment
 import os
 
 app = FastAPI(title=settings.PROJECT_NAME)
+
+@app.on_event("startup")
+def on_startup():
+    from api.database import engine, Base, SessionLocal
+    from api.models import AdminUser
+    from api.core.security import get_password_hash
+    
+    # Create tables
+    Base.metadata.create_all(bind=engine)
+    
+    # Create admin
+    db = SessionLocal()
+    if not db.query(AdminUser).filter_by(username="admin").first():
+        admin = AdminUser(
+            username="admin",
+            hashed_password=get_password_hash("admin123")
+        )
+        db.add(admin)
+        db.commit()
+    db.close()
 
 # Configure CORS for React frontend
 app.add_middleware(
@@ -36,7 +56,7 @@ async def scan_page(request: Request, tracking_id: str):
     # Pass tracking_id to lightweight HTML template
     # Even if shipment isn't checked here, it will be checked on submission.
     # To improve UX, we can check if it exists:
-    from app.database import SessionLocal
+    from api.database import SessionLocal
     db = SessionLocal()
     shipment = db.query(Shipment).filter(Shipment.tracking_id == tracking_id).first()
     db.close()

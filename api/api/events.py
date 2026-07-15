@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from datetime import datetime
-from app.database import get_db
-from app.models import Shipment, HandlingEvent
-from app.schemas import HandlingEventResponse
-from app.services.image_processor import process_and_save_image
+from api.database import get_db
+from api.models import Shipment, HandlingEvent
+from api.schemas import HandlingEventResponse
+from api.services.image_processor import process_and_save_image
 import json
 
 router = APIRouter()

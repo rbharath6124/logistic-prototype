@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timedelta
-from app.database import get_db
-from app.models import Shipment, HandlingEvent
-from app.schemas import DashboardStats
-from app.core.security import get_current_user
+from api.database import get_db
+from api.models import Shipment, HandlingEvent
+from api.schemas import DashboardStats
+from api.core.security import get_current_user
 
 router = APIRouter()
 

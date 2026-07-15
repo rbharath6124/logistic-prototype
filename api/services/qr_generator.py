@@ -1,6 +1,6 @@
 import qrcode
 import os
-from app.core.config import settings
+from api.core.config import settings
 
 def generate_qr_code(tracking_id: str, scan_url: str) -> str:
     """Generates a QR code and saves it to the static uploads directory, returning the relative URL."""
