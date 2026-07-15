@@ -24,7 +24,7 @@ def on_startup():
     if not db.query(AdminUser).filter_by(username="admin").first():
         admin = AdminUser(
             username="admin",
-            hashed_password=get_password_hash("admin123")
+            password_hash=get_password_hash("admin123")
         )
         db.add(admin)
         db.commit()
