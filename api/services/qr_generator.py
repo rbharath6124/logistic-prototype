@@ -1,9 +1,9 @@
 import qrcode
-import os
-from api.core.config import settings
+import io
+import base64
 
 def generate_qr_code(tracking_id: str, scan_url: str) -> str:
-    """Generates a QR code and saves it to the static uploads directory, returning the relative URL."""
+    """Generates a QR code and returns it as a base64 data URL."""
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -15,11 +15,10 @@ def generate_qr_code(tracking_id: str, scan_url: str) -> str:
     
     img = qr.make_image(fill_color="black", back_color="white")
     
-    # Ensure upload directory exists
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    # Save to in-memory buffer and encode as base64
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    base64_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
     
-    filename = f"{tracking_id}.png"
-    filepath = os.path.join(settings.UPLOAD_DIR, filename)
-    img.save(filepath)
-    
-    return f"/static/uploads/{filename}"
+    return f"data:image/png;base64,{base64_str}"
