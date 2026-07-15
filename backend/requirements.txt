@@ -9,3 +9,4 @@ python-jose[cryptography]
 python-multipart
 pillow
 qrcode
+jinja2
