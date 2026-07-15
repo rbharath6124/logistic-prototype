@@ -184,44 +184,57 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<div class="loader"></div>';
             
-            const formData = new FormData();
-            formData.append('executive_name', document.querySelector('[name="executive_name"]').value);
-            formData.append('latitude', latInp.value);
-            formData.append('longitude', lngInp.value);
-            formData.append('accuracy', accInp.value);
+            var pkgFile = document.getElementById('pkg-input').files[0];
+            var selfieFile = document.getElementById('selfie-input').files[0];
             
-            const pkgFile = document.getElementById('pkg-input').files[0];
-            const selfieFile = document.getElementById('selfie-input').files[0];
-            
-            if (pkgFile) formData.append('package_photo', pkgFile, pkgFile.name || 'package.jpg');
-            if (selfieFile) formData.append('selfie_photo', selfieFile, selfieFile.name || 'selfie.jpg');
-            
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', `/api/events/${trackingId}`);
-            
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    document.getElementById('main-content').classList.add('hidden');
-                    document.getElementById('success-content').classList.remove('hidden');
-                } else {
-                    try {
-                        const err = JSON.parse(xhr.responseText);
-                        alert("Error: " + (err.detail || "Submission failed"));
-                    } catch(e) {
-                        alert("Error: " + xhr.statusText);
-                    }
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = 'Submit Scan';
-                }
-            };
-            
-            xhr.onerror = function() {
-                alert("Network error. Please check your connection and try again.");
+            if (!pkgFile || !selfieFile) {
+                alert("Please take both photos before submitting.");
                 submitBtn.disabled = false;
                 submitBtn.innerText = 'Submit Scan';
-            };
-            
-            xhr.send(formData);
+                return;
+            }
+
+            // Compress both images, then upload
+            Promise.all([compressImage(pkgFile), compressImage(selfieFile)]).then(function(blobs) {
+                var formData = new FormData();
+                formData.append('executive_name', document.querySelector('[name="executive_name"]').value);
+                formData.append('latitude', latInp.value);
+                formData.append('longitude', lngInp.value);
+                formData.append('accuracy', accInp.value);
+                formData.append('package_photo', blobs[0], 'package.jpg');
+                formData.append('selfie_photo', blobs[1], 'selfie.jpg');
+                
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/events/' + trackingId);
+                
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        document.getElementById('main-content').classList.add('hidden');
+                        document.getElementById('success-content').classList.remove('hidden');
+                    } else {
+                        try {
+                            var err = JSON.parse(xhr.responseText);
+                            alert("Error: " + (err.detail || "Submission failed"));
+                        } catch(ex) {
+                            alert("Error: " + xhr.statusText + " - " + xhr.responseText.substring(0, 200));
+                        }
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = 'Submit Scan';
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    alert("Network error. Please check your connection.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Submit Scan';
+                };
+                
+                xhr.send(formData);
+            }).catch(function(err) {
+                alert("Image processing error: " + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Submit Scan';
+            });
         });
     </script>
 </body>
