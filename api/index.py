@@ -10,8 +10,7 @@ import os
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
-@app.on_event("startup")
-def on_startup():
+try:
     from api.database import engine, Base, SessionLocal
     from api.models import AdminUser
     from api.core.security import get_password_hash
@@ -29,6 +28,8 @@ def on_startup():
         db.add(admin)
         db.commit()
     db.close()
+except Exception as e:
+    print(f"Database initialization error on Vercel cold start: {e}")
 
 # Configure CORS for React frontend
 app.add_middleware(
