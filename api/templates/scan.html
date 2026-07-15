@@ -202,7 +202,7 @@
                     submitBtn.innerText = 'Submit Scan';
                 }
             } catch (error) {
-                alert("Network error occurred.");
+                alert("Network error: " + error.message);
                 submitBtn.disabled = false;
                 submitBtn.innerText = 'Submit Scan';
             }
