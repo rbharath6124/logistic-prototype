@@ -5,12 +5,11 @@ from datetime import datetime, timedelta
 from api.database import get_db
 from api.models import Shipment, HandlingEvent
 from api.schemas import DashboardStats
-from api.core.security import get_current_user
 
 router = APIRouter()
 
 @router.get("/dashboard", response_model=DashboardStats)
-def get_dashboard_stats(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_dashboard_stats(db: Session = Depends(get_db)):
     today = datetime.utcnow().date()
     start_of_today = datetime(today.year, today.month, today.day)
     

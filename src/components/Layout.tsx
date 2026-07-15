@@ -1,15 +1,8 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Package, LayoutDashboard, PlusCircle, LogOut } from 'lucide-react';
-import { setAuthToken } from '../api/client';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Package, LayoutDashboard, PlusCircle } from 'lucide-react';
 
 export const Layout = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    setAuthToken('');
-    navigate('/login');
-  };
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -48,16 +41,6 @@ export const Layout = () => {
             );
           })}
         </nav>
-        
-        <div className="p-4 border-t">
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full text-left text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium"
-          >
-            <LogOut className="w-5 h-5" />
-            Sign Out
-          </button>
-        </div>
       </div>
 
       {/* Main Content */}

@@ -5,7 +5,6 @@ from datetime import datetime
 from api.database import get_db
 from api.models import Shipment, HandlingEvent
 from api.schemas import ShipmentCreate, ShipmentResponse, HandlingEventResponse
-from api.core.security import get_current_user
 from api.services.qr_generator import generate_qr_code
 
 router = APIRouter()
@@ -15,10 +14,9 @@ def generate_tracking_id(db: Session):
     return f"SHP-{datetime.now().year}-{count + 1:06d}"
 
 @router.post("/", response_model=ShipmentResponse)
-def create_shipment(shipment: ShipmentCreate, request: Request, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_shipment(shipment: ShipmentCreate, request: Request, db: Session = Depends(get_db)):
     tracking_id = generate_tracking_id(db)
     
-    # Assuming the app is deployed, we get the base URL from the request
     base_url = str(request.base_url).rstrip("/")
     scan_url = f"{base_url}/scan/{tracking_id}"
     
@@ -39,18 +37,18 @@ def create_shipment(shipment: ShipmentCreate, request: Request, db: Session = De
     return db_shipment
 
 @router.get("/", response_model=List[ShipmentResponse])
-def list_shipments(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def list_shipments(db: Session = Depends(get_db)):
     return db.query(Shipment).order_by(Shipment.created_at.desc()).all()
 
 @router.get("/{tracking_id}", response_model=ShipmentResponse)
-def get_shipment(tracking_id: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_shipment(tracking_id: str, db: Session = Depends(get_db)):
     shipment = db.query(Shipment).filter(Shipment.tracking_id == tracking_id).first()
     if not shipment:
         raise HTTPException(status_code=404, detail="Shipment not found")
     return shipment
 
 @router.get("/{tracking_id}/timeline", response_model=List[HandlingEventResponse])
-def get_shipment_timeline(tracking_id: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def get_shipment_timeline(tracking_id: str, db: Session = Depends(get_db)):
     shipment = db.query(Shipment).filter(Shipment.tracking_id == tracking_id).first()
     if not shipment:
         raise HTTPException(status_code=404, detail="Shipment not found")
