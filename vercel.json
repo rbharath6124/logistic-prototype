@@ -5,6 +5,14 @@
       "destination": "/api/index.py"
     },
     {
+      "source": "/scan/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/static/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
