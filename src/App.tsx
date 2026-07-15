@@ -16,6 +16,7 @@ function App() {
           <Route path="shipments/new" element={<CreateShipment />} />
           <Route path="shipments/:id" element={<ShipmentDetails />} />
         </Route>
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </BrowserRouter>
   );
